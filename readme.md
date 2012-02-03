@@ -1,6 +1,6 @@
 __Readme__
 
-This is a small class I created in a afternoon, which never got a lot of debugging. Treat it like one. __Enter at your peril!__ Fell free to fork and send pull requests.
+This is a small class I created in a afternoon, which never got a lot of debugging. Treat it like one. __Enter at your peril!__ Feel free to fork and send pull requests.
 
 __Features__
 
