@@ -16,10 +16,12 @@
 @property (nonatomic, strong, readwrite) NSMutableDictionary *downloadQueue;
 @property (nonatomic, strong, readwrite) NSMutableDictionary *completedDownloads;
 @property (nonatomic, strong, readwrite) NSDate              *completedDownloadsResetDate;
+@property (nonatomic, strong, readwrite) Download             *currentDownload;
+
 @end
 
 @implementation DownloadManager
-@synthesize downloadQueue, completedDownloads, completedDownloadsResetDate, downloadKeys;
+@synthesize downloadQueue, completedDownloads, completedDownloadsResetDate, downloadKeys, currentDownload;
 
 #pragma mark - Initialization
 
@@ -50,32 +52,28 @@ static DownloadManager *sharedData;
 {
     Download*completedDownload = [self.completedDownloads objectForKey:download.url];
     if (completedDownload) {
-        completion(completedDownload.url.absoluteString,completedDownload.activeDownload,nil);
+        completion(completedDownload, completedDownload.downloadData);
     }
     else {
         Download *savedDownload = [self.downloadQueue objectForKey:download.url.absoluteString];
         if (!savedDownload) {
-            
-            NSLog(@"Adding Download with URL:%@",download.url.absoluteString);
-            
+                        
             [self.downloadQueue setObject:download 
                                          forKey:download.url.absoluteString];
             [self.downloadKeys addObject:download.url.absoluteString];
             savedDownload = download;
             
             //Continue To Next Download on Completion
-            [savedDownload addCompletionBlock:^(NSString *url, NSData *data, NSDate *completionDate) {
-                Download*download = [self.downloadQueue objectForKey:url];
-                [self.completedDownloads setObject:download forKey:url];
-                [self.downloadQueue removeObjectForKey:url];
-                [self.downloadKeys removeObject:url];
+            [savedDownload addCompletionBlock:^(Download *download, NSData*data) {
+                [self.completedDownloads setObject:download forKey:download.url];
+                [self.downloadQueue removeObjectForKey:download.url];
+                [self.downloadKeys removeObject:download.url.absoluteString];
                 [self continueToNextDownload]; 
             }];
-            [savedDownload addFailBlock:^(NSString *url, NSError *error, NSDate *failDate) {
-                Download*download = [self.downloadQueue objectForKey:url];
-                [self.completedDownloads setObject:download forKey:url];
-                [self.downloadQueue removeObjectForKey:url];
-                [self.downloadKeys removeObject:url];
+            [savedDownload addFailBlock:^(Download *download, NSError*error) {
+                [self.completedDownloads setObject:download forKey:download.url];
+                [self.downloadQueue removeObjectForKey:download.url];
+                [self.downloadKeys removeObject:download.url];
                 [self continueToNextDownload]; 
             }];
             if (self.downloadQueue.count == 1) {
@@ -89,17 +87,60 @@ static DownloadManager *sharedData;
     }
 }
 
+- (void)addImportantDownload:(Download *)download withCompletion:(CompletionBlock)completion;
+{    
+    Download*completedDownload = [self.completedDownloads objectForKey:download.url];
+    if (completedDownload) {
+        completion(completedDownload, completedDownload.downloadData);
+    }
+    else {
+        Download *savedDownload = [self.downloadQueue objectForKey:download.url.absoluteString];
+        if (!savedDownload) {
+            
+            NSString *newKey = download.url.absoluteString;
+            [self.currentDownload pause];
+            NSLog(@"Adding Important Download with URL:%@",download.url.absoluteString);
+            
+            [self.downloadQueue setObject:download 
+                                   forKey:newKey];
+            [self.downloadKeys insertObject:newKey atIndex:0];
+            savedDownload = download;
+            
+            //Continue To Next Download on Completion
+            [savedDownload addCompletionBlock:^(Download *download, NSData*data) {
+                [self.completedDownloads setObject:download forKey:newKey];
+                [self.downloadQueue removeObjectForKey:newKey];
+                [self.downloadKeys removeObject:newKey];
+                [self continueToNextDownload]; 
+            }];
+            [savedDownload addFailBlock:^(Download *download, NSError*error) {
+                [self.completedDownloads setObject:download forKey:newKey];
+                [self.downloadQueue removeObjectForKey:newKey];
+                [self.downloadKeys removeObject:newKey];
+                [self continueToNextDownload]; 
+            }];
+            [self continueToNextDownload];
+      
+        }
+        
+        [savedDownload addCompletionBlock:completion];
+    }
+}
+
 - (void)continueToNextDownload
 {
-    Download *downloadToDownload = [self.downloadQueue objectForKey:[self.downloadKeys lastObject]];
+    Download *downloadToDownload;
+    if (self.downloadKeys.count > 0) downloadToDownload = [self.downloadQueue objectForKey:[self.downloadKeys objectAtIndex:0]];
     if (!downloadToDownload) {
         NSLog(@"All Downloads are Done!");
+        currentDownload = nil;
         
         //Hide spinner
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
 
     }
     else {
+        currentDownload = downloadToDownload;
         [downloadToDownload start];
         NSLog(@"Beginning to actually Download URL:%@",downloadToDownload.url.absoluteString);
         
@@ -107,6 +148,16 @@ static DownloadManager *sharedData;
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     }
 }
+
+- (void)pause
+{
+    [self.currentDownload pause];
+}
+- (void)resume
+{
+    [self.currentDownload start];
+}
+
 
 
 

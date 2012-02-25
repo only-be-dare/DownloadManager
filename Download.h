@@ -7,23 +7,41 @@
 //
 
 #import <Foundation/Foundation.h>
-typedef void(^CompletionBlock)(NSString*url, NSData*data, NSDate*completionDate);
-typedef void(^FailBlock)(NSString*url, NSError*error, NSDate*failDate);
 
 
-@interface Download : NSObject
 
-+ (Download *)downloadFromURLString:(NSString *)urlString;
 
+@interface Download : NSObject <NSURLConnectionDelegate, NSURLConnectionDataDelegate>
+
+typedef void(^CompletionBlock)(Download *download, NSData*data);
+typedef void(^UpdateBlock)(float percentage);
+typedef void(^FailBlock)(Download *download, NSError*error);
+
++ (id)downloadFromURLString:(NSString *)urlString writeToPath:(NSString *)path;
++ (id)downloadFromURLString:(NSString *)urlString updateBlock:(UpdateBlock)block writeToPath:(NSString *)path; 
+
+- (BOOL)isWritingToDisk;
 - (BOOL)isEqualToDownload:(Download *)download;
+- (BOOL)downloadIsActive;
+
 - (void)addCompletionBlock:(CompletionBlock)completion;
 - (void)addFailBlock:(FailBlock)failBlock;
+- (void)addUpdateBLock:(UpdateBlock)block;
 
 
 - (id)start;
+- (id)resume;
+- (id)pause;
 - (id)cancel;
 
-@property (nonatomic, strong) NSMutableData     *activeDownload;
+@property (nonatomic, strong) NSMutableData     *downloadData;
 @property (nonatomic, strong) NSURL             *url;
 @property (nonatomic, strong, readonly) NSDate  *completionDate;
+@property (nonatomic, strong) id                object;
+@property (nonatomic, copy) NSString            *savePath;
+
+@property (nonatomic, strong) NSMutableArray *completionBlocks;
+@property (nonatomic, strong) NSMutableArray *updateBlocks;
+@property (nonatomic, strong) NSMutableArray *failBlocks;
+@property (nonatomic, strong) NSURLConnection *connection;
 @end
