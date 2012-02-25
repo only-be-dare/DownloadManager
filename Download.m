@@ -19,7 +19,7 @@
 }
 @synthesize url, completionBlocks, connection,downloadData, failBlocks, completionDate, object, savePath, updateBlocks;
 
-+ (Download *)downloadFromURLString:(NSString *)urlString writeToPath:(NSString *)apath; 
++ (id)downloadFromURLString:(NSString *)urlString writeToPath:(NSString *)apath; 
 {
     Download *download = [[Download alloc] init];
     download.url = [NSURL URLWithString:urlString];
@@ -31,11 +31,11 @@
 - (id)start
 {
     if (hasBeenStarted != TRUE) [self startDownloading];
-        else {
-            [self resume];
-            
-            
-        }
+    else {
+        [self resume];
+        
+        
+    }
     return self;    
 }
 
@@ -81,7 +81,7 @@
     self.connection = conn;    
     
     return self;
-
+    
 }
 
 - (id)cancel
@@ -125,23 +125,23 @@
     return FALSE;
 }
 /*
-- (BOOL)downloadHasBeenStarted
-{
-    BOOL result = FALSE;
-    
-    if (self.downloadData.length > 0) result = TRUE;
-    
-    //Get filesize
-    if ([self isWritingToDisk]) {
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSDictionary *attributes = [fileManager attributesOfItemAtPath:self.savePath error:nil];
-        if (attributes) {
-            NSNumber *size = [attributes objectForKey:NSFileSize];
-            if (size > 0) return TRUE;
-        }
-    }
-    return FALSE;
-}
+ - (BOOL)downloadHasBeenStarted
+ {
+ BOOL result = FALSE;
+ 
+ if (self.downloadData.length > 0) result = TRUE;
+ 
+ //Get filesize
+ if ([self isWritingToDisk]) {
+ NSFileManager *fileManager = [NSFileManager defaultManager];
+ NSDictionary *attributes = [fileManager attributesOfItemAtPath:self.savePath error:nil];
+ if (attributes) {
+ NSNumber *size = [attributes objectForKey:NSFileSize];
+ if (size > 0) return TRUE;
+ }
+ }
+ return FALSE;
+ }
  */
 - (BOOL)downloadIsActive
 {
