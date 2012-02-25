@@ -83,7 +83,7 @@ static DownloadManager *sharedData;
         
         
         
-        [savedDownload addCompletionBlock:completion];
+        if (completion)[savedDownload addCompletionBlock:completion];
     }
 }
 
@@ -123,7 +123,7 @@ static DownloadManager *sharedData;
       
         }
         
-        [savedDownload addCompletionBlock:completion];
+        if (completion)[savedDownload addCompletionBlock:completion];
     }
 }
 

@@ -13,6 +13,15 @@
 @synthesize unzipPath;
 @synthesize fullUnzipPath;
 
++ (id)downloadFromURLString:(NSString *)urlString writeToPath:(NSString *)apath; 
+{
+    ZipDownload *download = [[ZipDownload alloc] init];
+    download.url = [NSURL URLWithString:urlString];
+    download.completionBlocks = [NSMutableArray array];
+    download.failBlocks = [NSMutableArray array];
+    download.savePath = apath;
+    return download;
+}
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
