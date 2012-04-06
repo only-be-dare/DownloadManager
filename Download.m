@@ -17,7 +17,7 @@
     float amountDownloaded;
     float expectedSize;
 }
-@synthesize url, completionBlocks, connection,downloadData, failBlocks, completionDate, object, savePath, updateBlocks;
+@synthesize url, completionBlocks, connection,downloadData, failBlocks, completionDate, object, savePath, updateBlocks, progess;
 
 + (id)downloadFromURLString:(NSString *)urlString writeToPath:(NSString *)apath; 
 {
@@ -159,6 +159,7 @@
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
     amountDownloaded += data.length;
+    self.progess = amountDownloaded/expectedSize;
     if (self.savePath == nil || [self.savePath isEqualToString:@""]) {
         [self.downloadData appendData:data];
     }

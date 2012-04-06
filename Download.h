@@ -39,6 +39,7 @@ typedef void(^FailBlock)(Download *download, NSError*error);
 @property (nonatomic, strong, readonly) NSDate  *completionDate;
 @property (nonatomic, strong) id                object;
 @property (nonatomic, copy) NSString            *savePath;
+@property (nonatomic, assign) float             progress;
 
 @property (nonatomic, strong) NSMutableArray *completionBlocks;
 @property (nonatomic, strong) NSMutableArray *updateBlocks;
