@@ -18,7 +18,7 @@ typedef void(^UpdateBlock)(float percentage);
 typedef void(^FailBlock)(Download *download, NSError*error);
 
 + (id)downloadFromURLString:(NSString *)urlString writeToPath:(NSString *)path;
-+ (id)downloadFromURLString:(NSString *)urlString updateBlock:(UpdateBlock)block writeToPath:(NSString *)path; 
+//+ (id)downloadFromURLString:(NSString *)urlString updateBlock:(UpdateBlock)block writeToPath:(NSString *)path;
 
 - (BOOL)isWritingToDisk;
 - (BOOL)isEqualToDownload:(Download *)download;
